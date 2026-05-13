@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simple Web Frame — HTML + CSS + JS (defFunc)</title>
+
+  <style>
+    :root{
+      --page-margin: 20px;      /* change this to control page margins */
+      --max-width: 920px;
+      --card-padding: 16px;
+      --gap: 12px;
+      --accent: #2b7cff;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin: var(--page-margin);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #fafcff;
+      color: #0f172a;
+      line-height: 1.45;
+    }
+
+    /* "index" container centered using max-width and auto margins */
+    .container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 14px;
+    }
+
+    header.site-header{
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    header h1{ margin: 0 0 6px; font-size: 1.4rem; }
+    header p { margin: 0; color: var(--muted); }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e6eef8;
+      padding: var(--card-padding);
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(16,24,40,0.04);
+    }
+
+    .row {
+      display:flex;
+      gap: var(--gap);
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 0.6rem;
+    }
+
+    label { font-size: 0.95rem; }
+
+    input[type="number"], input[type="text"] {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      width: 140px;
+      font-size: 0.95rem;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: #eef2ff;
+      color: var(--accent);
+      border: 1px solid #dbeafe;
+      font-weight: 600;
+    }
+
+    .result {
+      margin-top: 0.75rem;
+      padding: 10px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      color: #02132b;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 1rem;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width:520px){
+      input[type="number"] { width: 100%; }
+      .row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="index">
+    <header class="site-header">
+      <h1>HTML Frame with CSS and a Defined JS Function (defFunc)</h1>
+      <p>Open this file in a browser. The JS below defines defFunc(a,b) and wires up the UI.</p>
+    </header>
+
+    <section class="card">
+      <h2>Client-side function: defFunc</h2>
+      <p>Enter two values and click "Compute (client)". defFunc runs in the browser and shows the result.</p>
+
+      <div class="row">
+        <label>Value A: <input id="a" type="text" value="2" /></label>
+        <label>Value B: <input id="b" type="text" value="3" /></label>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button id="btn-client">Compute (client)</button>
+        <button id="btn-clear" class="secondary">Clear</button>
+      </div>
+
+      <div id="result" class="result" aria-live="polite">Result will appear here.</div>
+    </section>
+
+    <section class="card">
+      <h2>About this frame</h2>
+      <p>This single-file example demonstrates:</p>
+      <ul>
+        <li>CSS variables for global margins and layout.</li>
+        <li>An "index" container centered with max-width and auto margins.</li>
+        <li>A defined JS function (defFunc) used by UI code.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Save this file as <code>index.html</code> and open it in your browser.
+    </footer>
+  </div>
+
+  <script>
+    // defFunc: defined function used by the page.
+    // Current behavior: if both inputs are numeric strings, returns numeric sum.
+    // Otherwise concatenates them with a space.
+    function defFunc(a, b) {
+      // try numeric conversion
+      const aNum = Number(a);
+      const bNum = Number(b);
+      const isANum = !Number.isNaN(aNum) && a !== '';
+      const isBNum = !Number.isNaN(bNum) && b !== '';
+
+      if (isANum && isBNum) {
+        return aNum + bNum; // numeric sum
+      }
+
+      // fallback: trim and join as text
+      const left = (a ?? '').toString().trim();
+      const right = (b ?? '').toString().trim();
+      if (left === '' && right === '') return '';
+      if (left === '') return right;
+      if (right === '') return left;
+      return left + ' ' + right;
+    }
+
+    // Wire up UI
+    document.addEventListener('DOMContentLoaded', () => {
+      const aEl = document.getElementById('a');
+      const bEl = document.getElementById('b');
+      const btnClient = document.getElementById('btn-client');
+      const btnClear = document.getElementById('btn-clear');
+      const resultEl = document.getElementById('result');
+
+      btnClient.addEventListener('click', () => {
+        const a = aEl.value;
+        const b = bEl.value;
+        const output = defFunc(a, b);
+        // show a descriptive result
+        if (typeof output === 'number') {
+          resultEl.textContent = `Client (numeric): ${a} + ${b} = ${output}`;
+        } else if (output === '') {
+          resultEl.textContent = 'Client: both inputs empty';
+        } else {
+          resultEl.textContent = `Client (text): "${output}"`;
+        }
+      });
+
+      btnClear.addEventListener('click', () => {
+        aEl.value = '';
+        bEl.value = '';
+        resultEl.textContent = 'Cleared inputs.';
+        aEl.focus();
+      });
+
+      // allow Enter key on inputs to trigger compute
+      [aEl, bEl].forEach(el => {
+        el.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') {
+            ev.preventDefault();
+            btnClient.click();
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
